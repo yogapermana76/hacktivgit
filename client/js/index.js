@@ -4,9 +4,8 @@ function getMyRepo() {
     method: 'GET'
   })
     .done(function(response) {
-      console.log(response)
       response.forEach(repo => {
-        $('#repos').append(`<li class="list-group-item">${repo.name}</li>`)
+        $('#repos').append(`<li class="list-group-item"><a target="_blank" href="${repo.clone_url}">${repo.name}</a></li>`)
       });
     })
     .fail(function(jqXHR, textStatus) {
@@ -24,7 +23,7 @@ function getStarredRepo() {
         $('#star-repo').append(`
         <tr>
           <td>${repo.owner.login}</td>
-          <td>${repo.name}</td>
+          <td><a href="${repo.clone_url}">${repo.name}</a></td>
         </tr>`)
       });
     })
@@ -37,7 +36,6 @@ function createRepo() {
   event.preventDefault()
 
   const title = $('#repo').val()
-  console.log(title)
   $.ajax({
     url: 'http://localhost:3000/users',
     method: 'POST',
@@ -53,10 +51,29 @@ function createRepo() {
     })
 }
 
+function onSignIn(googleUser) {
+  const profile = googleUser.getBasicProfile();
+  console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+  console.log('Name: ' + profile.getName());
+  console.log('Image URL: ' + profile.getImageUrl());
+  console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+  const id_token = googleUser.getAuthResponse().id_token;
+
+  $.ajax({
+    url: 'http://localhost:3000/users/signin-google',
+    method: 'POST',
+    data: {
+      id_token
+    }
+  })
+}
+
+
 $(document).ready(function() {
   getMyRepo();
   getStarredRepo();
-  // createRepo()
+  
   $('#createForm').submit(function() {
     createRepo()
   })

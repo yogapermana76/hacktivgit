@@ -1,4 +1,9 @@
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client(process.env.CLIENT_ID);
+const User = require('../model/user')
 const axios = require('axios')
+const jwt = require('jsonwebtoken')
+
 let ax = axios.create({
   baseURL: 'https://api.github.com'
 })
@@ -6,6 +11,30 @@ let ax = axios.create({
 ax.defaults.headers.common['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
 
 class UserController {
+
+  static signInGoogle(req, res) {
+    client.verifyIdToken({
+      idToken: req.body.id_token,
+      audience: process.env.CLIENT_ID
+    })
+    .then(ticket => {
+      // res.status(200).json(ticket.getPayload());
+      return User.findOne({
+        email: ticket.getPayload().email
+      })
+    })
+    .then(user => {
+      if(!user) {
+        return User.create({
+          
+        })
+      }
+    })
+    .catch(err => {
+      res.status(500).json(err)
+    })
+  }
+
   static getRepos(req, res) {
     ax
       .get('/users')
@@ -24,8 +53,6 @@ class UserController {
       })
       .then(({data }) => {
         res.status(201).json(data)
-        console.log('sukses brooooooo');
-        
       })
       .catch(err => {
         res.status(500).json(err)

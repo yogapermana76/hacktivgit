@@ -7,5 +7,6 @@ router.delete('/:owner/:repoName', UserController.deleteRepo)
 router.get('/starred', UserController.getStarredRepo)
 router.delete('/starred/:owner/:repo', UserController.unstarRepo)
 router.get('/:username/repos', UserController.searchRepo)
+router.post('/signin-google', UserController.signInGoogle)
 
 module.exports = router
